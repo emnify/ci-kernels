@@ -17,7 +17,7 @@ COPY llvm.pref /etc/apt/preferences.d
 
 # Bake the appropriate clang version into the container
 ARG CLANG_VERSION=19
-ARG PAHOLE_VERSION=1.27
+ARG PAHOLE_VERSION=1.31
 ENV CLANG=clang-${CLANG_VERSION}
 ENV LLC=llc-${CLANG_VERSION}
 ENV LLVM_OBJCOPY=llvm-objcopy-${CLANG_VERSION}
@@ -53,7 +53,8 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
         libc6-dev-i386 \
         cmake \
         libdw-dev \
-        git
+        git \
+        xxd
 
 RUN cd /tmp && \
     git clone https://git.kernel.org/pub/scm/devel/pahole/pahole.git && \
