@@ -32,7 +32,7 @@ fi
 
 version="$1"
 image_tag="${2:-}"
-readonly IMAGE="ghcr.io/cilium/ci-kernels"
+readonly IMAGE="ghcr.io/emnify/ci-kernels"
 
 cd "$(dirname "$0")/.."
 
