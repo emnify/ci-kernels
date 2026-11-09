@@ -1,4 +1,4 @@
-FROM debian:bookworm
+FROM debian:trixie
 
 LABEL org.opencontainers.image.source=https://github.com/cilium/ci-kernels
 
@@ -11,13 +11,13 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     apt-get install -y --no-install-recommends \
         ca-certificates
 
-COPY llvm-snapshot.gpg /usr/share/keyrings
-COPY llvm.list /etc/apt/sources.list.d
-COPY llvm.pref /etc/apt/preferences.d
+COPY llvm-snapshot.gpg.key /etc/apt/trusted.gpg.d/apt.llvm.org.asc
+COPY llvm.list /etc/apt/sources.list.d/
+COPY llvm.pref /etc/apt/preferences.d/
 
 # Bake the appropriate clang version into the container
-ARG CLANG_VERSION=19
-ARG PAHOLE_VERSION=1.31
+ARG CLANG_VERSION=22
+ARG PAHOLE_VERSION=6fd0dacc9418b103af4245ab300b9c135bcdb383
 ENV CLANG=clang-${CLANG_VERSION}
 ENV LLC=llc-${CLANG_VERSION}
 ENV LLVM_OBJCOPY=llvm-objcopy-${CLANG_VERSION}
@@ -25,11 +25,19 @@ ENV LLVM_READELF=llvm-readelf-${CLANG_VERSION}
 ENV LLVM_STRIP=llvm-strip-${CLANG_VERSION}
 ENV LLVM_DWARFDUMP=llvm-dwarfdump-${CLANG_VERSION}
 
-# Update and install dependencies
+
+# Update and install dependencies.
+#
+# Kernels 5.15 and earlier build libbpf as part of bpf_preload_umd, which
+# depends on libelf and zlib, requiring their ARM64 versions to be installed.
+# arm64 dependencies can be removed when 5.15 is no longer maintained.
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     --mount=type=cache,target=/var/lib/apt,sharing=locked \
+    dpkg --add-architecture arm64 && \
     apt-get update && \
     apt-get install -y --no-install-recommends \
+        libelf-dev:arm64 \
+        zlib1g-dev:arm64 \
         curl \
         tar \
         build-essential \
@@ -59,7 +67,7 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
 RUN cd /tmp && \
     git clone https://git.kernel.org/pub/scm/devel/pahole/pahole.git && \
     cd pahole && \
-    git checkout v${PAHOLE_VERSION} && \
+    git checkout ${PAHOLE_VERSION} && \
     git submodule update --init --recursive && \
     mkdir build && \
     cd build && \

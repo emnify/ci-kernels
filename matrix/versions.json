@@ -1,0 +1,29 @@
+[
+  {
+    "version": "7.3-rc4",
+    "channel": "mainline",
+    "image_tag": "mainline"
+  },
+  {
+    "version": "7.2.7",
+    "channel": "stable",
+    "image_tag": "stable"
+  },
+  {
+    "version": "6.19.1",
+    "channel": "longterm",
+    "image_tag": "longterm"
+  },
+  {
+    "version": "6.17",
+    "channel": "longterm"
+  },
+  {
+    "version": "6.15.3",
+    "channel": "longterm"
+  },
+  {
+    "version": "6.11.1",
+    "channel": "longterm"
+  }
+]

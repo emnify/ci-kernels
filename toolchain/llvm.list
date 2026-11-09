@@ -1,0 +1,2 @@
+deb http://apt.llvm.org/trixie/ llvm-toolchain-trixie-22 main
+deb-src http://apt.llvm.org/trixie/ llvm-toolchain-trixie-22 main
