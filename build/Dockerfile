@@ -1,4 +1,4 @@
-FROM --platform=$BUILDPLATFORM ghcr.io/cilium/ci-kernels-builder:1767797740 AS configure-vmlinux
+FROM --platform=$BUILDPLATFORM ghcr.io/cilium/ci-kernels-builder:1788791853 AS configure-vmlinux
 
 ARG KERNEL_VERSION
 
@@ -32,16 +32,15 @@ RUN --mount=type=cache,target=/ccache \
 RUN mkdir -p /tmp/output/boot && \
     find ./ -type f -name '*Image' -exec cp -v {} /tmp/output/boot/vmlinuz \;
 
-# Install modules in /usr/lib/modules, with a symlink from /lib to
-# /usr/lib. This avoids breaking overlay in merged usr scenarios.
-RUN if [ -d tools/testing/selftests/bpf/bpf_testmod ]; then \
-        make M=tools/testing/selftests/bpf/bpf_testmod INSTALL_MOD_PATH=/tmp/output/usr modules_install; \
-        ln -s usr/lib /tmp/output/lib; \
-    fi
-
-# Starting with v6.14-rc1 the location of testmods has changed.
-RUN if [ -d tools/testing/selftests/bpf/test_kmods ]; then \
-        make M=tools/testing/selftests/bpf/test_kmods INSTALL_MOD_PATH=/tmp/output/usr modules modules_install; \
+# Install modules in /usr/lib/modules, with a symlink from /lib to /usr/lib.
+# This avoids breaking overlay in merged usr scenarios. Remove the symlink when
+# vimto lands support for usrmerge detection in base layers.
+#
+# Source env.sh for ARCH/CROSS_COMPILE, since make otherwise defaults to the
+# build platform's architecture when cross compiling.
+RUN . ./env.sh && \
+    if [ -n "$TESTMOD_DIR" ]; then \
+        make M="$TESTMOD_DIR" INSTALL_MOD_PATH=/tmp/output/usr modules_install && \
         ln -s usr/lib /tmp/output/lib; \
     fi
 
